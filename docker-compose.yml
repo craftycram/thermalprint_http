@@ -1,0 +1,19 @@
+services:
+  thermalprint:
+    image: ghcr.io/craftycram/thermalprint_http:latest
+    build: .
+    restart: unless-stopped
+    ports:
+      - '3000:3000'
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      PRINTER_TYPE: epson
+      PRINTER_INTERFACE: /dev/usb/lp0
+    # USB printer: pass the device through. Remove for network (tcp://) printers.
+    devices:
+      - /dev/usb/lp0:/dev/usb/lp0
+    # If the device isn't group `lp` (gid 7) on your host, add its gid:
+    # group_add:
+    #   - '7'
