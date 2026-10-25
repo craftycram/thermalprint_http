@@ -52,6 +52,7 @@ For a **network printer**, drop `devices` and set `PRINTER_INTERFACE=tcp://192.1
 | --- | --- | --- |
 | `PORT` | `3000` | HTTP port |
 | `API_KEY` | – | If set, every endpoint except `/` and `/health` needs `X-API-Key: <key>`, `Authorization: Bearer <key>` or `?key=<key>` (at least 8 characters) |
+| `MCP_API_KEY` | – | An extra key accepted only on `/mcp`, so Claude's access can be revoked on its own. Setting it alone protects `/mcp` only |
 | `BODY_LIMIT_MB` | `10` | Maximum size of a JSON body or image upload |
 | `SWAGGER_ENABLED` | `true` | Serve the Swagger UI |
 | `SWAGGER_PATH` | `swagger` | Swagger UI path; the OpenAPI JSON is served at `/<path>-json` |
@@ -134,10 +135,10 @@ curl -X POST localhost:3000/print/image -F image=@logo.png -F cut=false
 tools `printer_status`, `print_text`, `print_job` and `print_test_page`.
 
 In Claude, open **Settings → Connectors → Add custom connector** and enter
-`https://<your-host>/mcp?key=<API_KEY>`. Custom connectors can't send headers, so the key goes
+`https://<your-host>/mcp?key=<MCP_API_KEY>` (`API_KEY` works too). Custom connectors can't send headers, so the key goes
 in the URL; `?key=` works on every endpoint. claude.ai connects from Anthropic's cloud, so the
 service needs a public HTTPS URL, for example through a reverse proxy or a Cloudflare/Tailscale
-tunnel. Always set `API_KEY` when the service is exposed.
+tunnel. Always set `API_KEY` when the service is exposed; `MCP_API_KEY` alone leaves the REST endpoints open.
 
 ## Development
 

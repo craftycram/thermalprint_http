@@ -12,9 +12,12 @@ import { Env } from './config';
 
 const IS_PUBLIC = 'isPublic';
 export const Public = () => SetMetadata(IS_PUBLIC, true);
+const ACCEPTS_MCP_KEY = 'acceptsMcpKey';
+/** Also accept MCP_API_KEY, so Claude's key can be revoked without touching other clients. */
+export const AcceptsMcpKey = () => SetMetadata(ACCEPTS_MCP_KEY, true);
 
 /**
- * Enforced only when API_KEY is set. Accepts `X-API-Key: <key>`, `Authorization: Bearer <key>`
+ * Enforced only when API_KEY (or MCP_API_KEY on MCP routes) is set. Accepts `X-API-Key: <key>`, `Authorization: Bearer <key>`
  * or `?key=<key>` (for MCP clients like claude.ai custom connectors that can't set headers).
  */
 @Injectable()
@@ -25,13 +28,15 @@ export class ApiKeyGuard implements CanActivate {
   ) {}
 
   canActivate(context: ExecutionContext): boolean {
-    if (!this.env.API_KEY) return true;
-    if (
-      this.reflector.getAllAndOverride<boolean>(IS_PUBLIC, [
-        context.getHandler(),
-        context.getClass(),
-      ])
-    )
+    const targets = [context.getHandler(), context.getClass()];
+    const keys = [
+      this.env.API_KEY,
+      this.reflector.getAllAndOverride<boolean>(ACCEPTS_MCP_KEY, targets)
+        ? this.env.MCP_API_KEY
+        : undefined,
+    ].filter((k): k is string => !!k);
+    if (!keys.length) return true;
+    if (this.reflector.getAllAndOverride<boolean>(IS_PUBLIC, targets))
       return true;
 
     const req = context.switchToHttp().getRequest<Request>();
@@ -40,8 +45,11 @@ export class ApiKeyGuard implements CanActivate {
       req.header('authorization')?.replace(/^Bearer\s+/i, '') ??
       (typeof req.query.key === 'string' ? req.query.key : undefined);
     const a = Buffer.from(provided ?? '');
-    const b = Buffer.from(this.env.API_KEY);
-    if (a.length === b.length && timingSafeEqual(a, b)) return true;
+    const matches = (key: string) => {
+      const b = Buffer.from(key);
+      return a.length === b.length && timingSafeEqual(a, b);
+    };
+    if (keys.some(matches)) return true;
     throw new UnauthorizedException('Missing or invalid API key');
   }
 }

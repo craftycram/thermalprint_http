@@ -39,6 +39,12 @@ export class Env {
   @IsString()
   @MinLength(8)
   API_KEY?: string;
+  /** Extra key accepted only on /mcp */
+  @Transform(emptyToUndefined)
+  @IsOptional()
+  @IsString()
+  @MinLength(8)
+  MCP_API_KEY?: string;
   /** Max request size (JSON body and image upload) */
   @Transform(toInt) @IsInt() @Min(1) BODY_LIMIT_MB = 10;
   @Transform(toBool) @IsBoolean() SWAGGER_ENABLED = true;

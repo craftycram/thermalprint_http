@@ -11,6 +11,7 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
 import { Request, Response } from 'express';
 import { z } from 'zod';
+import { AcceptsMcpKey } from './api-key.guard';
 import { pkg } from './config';
 import { PrintJobDto } from './printer/print.dto';
 import { PrinterService } from './printer/printer.service';
@@ -36,6 +37,7 @@ const COMMANDS_HELP = `Commands run in order; styles apply only to the command t
 
 /** Streamable HTTP MCP endpoint (stateless), so Claude Desktop/web can print via a custom connector. */
 @ApiExcludeController()
+@AcceptsMcpKey()
 @Controller('mcp')
 export class McpController {
   constructor(private readonly printer: PrinterService) {}

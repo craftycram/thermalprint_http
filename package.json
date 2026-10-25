@@ -1,6 +1,6 @@
 {
   "name": "thermalprint-http",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "REST API for ESC/POS thermal printers (Epson, Star, ...) powered by node-thermal-printer",
   "private": true,
   "license": "MIT",
