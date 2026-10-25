@@ -51,7 +51,7 @@ For a **network printer**, drop `devices` and set `PRINTER_INTERFACE=tcp://192.1
 | Variable | Default | Description |
 | --- | --- | --- |
 | `PORT` | `3000` | HTTP port |
-| `API_KEY` | – | If set, every endpoint except `/` and `/health` needs `X-API-Key: <key>` or `Authorization: Bearer <key>` (at least 8 characters) |
+| `API_KEY` | – | If set, every endpoint except `/` and `/health` needs `X-API-Key: <key>`, `Authorization: Bearer <key>` or `?key=<key>` (at least 8 characters) |
 | `BODY_LIMIT_MB` | `10` | Maximum size of a JSON body or image upload |
 | `SWAGGER_ENABLED` | `true` | Serve the Swagger UI |
 | `SWAGGER_PATH` | `swagger` | Swagger UI path; the OpenAPI JSON is served at `/<path>-json` |
@@ -80,6 +80,7 @@ For local development, a `.env` file is loaded automatically. See `.env.example`
 | POST | `/print/image` | multipart: `image` (a PNG file) plus an optional `cut` |
 | POST | `/print/raw` | `{ "data": "<base64 ESC/POS bytes>" }`, sent to the printer unchanged |
 | POST | `/print/test` | Print a test page |
+| POST | `/mcp` | MCP server for Claude, see [MCP](#mcp-claude-desktop--claudeai) |
 
 Print endpoints return `{ success, bytes, durationMs }`. Errors use Nest's standard shape
 `{ statusCode, message, error }`:
@@ -126,6 +127,17 @@ Styles apply only to the command they're set on. Each command's full schema is i
 ```sh
 curl -X POST localhost:3000/print/image -F image=@logo.png -F cut=false
 ```
+
+## MCP (Claude Desktop / claude.ai)
+
+`POST /mcp` is a stateless [MCP](https://modelcontextprotocol.io) server (Streamable HTTP) with the
+tools `printer_status`, `print_text`, `print_job` and `print_test_page`.
+
+In Claude, open **Settings → Connectors → Add custom connector** and enter
+`https://<your-host>/mcp?key=<API_KEY>`. Custom connectors can't send headers, so the key goes
+in the URL; `?key=` works on every endpoint. claude.ai connects from Anthropic's cloud, so the
+service needs a public HTTPS URL, for example through a reverse proxy or a Cloudflare/Tailscale
+tunnel. Always set `API_KEY` when the service is exposed.
 
 ## Development
 

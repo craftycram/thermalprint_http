@@ -13,7 +13,10 @@ import { Env } from './config';
 const IS_PUBLIC = 'isPublic';
 export const Public = () => SetMetadata(IS_PUBLIC, true);
 
-/** Enforced only when API_KEY is set. Accepts `X-API-Key: <key>` or `Authorization: Bearer <key>`. */
+/**
+ * Enforced only when API_KEY is set. Accepts `X-API-Key: <key>`, `Authorization: Bearer <key>`
+ * or `?key=<key>` (for MCP clients like claude.ai custom connectors that can't set headers).
+ */
 @Injectable()
 export class ApiKeyGuard implements CanActivate {
   constructor(
@@ -34,7 +37,8 @@ export class ApiKeyGuard implements CanActivate {
     const req = context.switchToHttp().getRequest<Request>();
     const provided =
       req.header('x-api-key') ??
-      req.header('authorization')?.replace(/^Bearer\s+/i, '');
+      req.header('authorization')?.replace(/^Bearer\s+/i, '') ??
+      (typeof req.query.key === 'string' ? req.query.key : undefined);
     const a = Buffer.from(provided ?? '');
     const b = Buffer.from(this.env.API_KEY);
     if (a.length === b.length && timingSafeEqual(a, b)) return true;

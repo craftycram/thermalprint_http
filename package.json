@@ -1,6 +1,6 @@
 {
   "name": "thermalprint-http",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "REST API for ESC/POS thermal printers (Epson, Star, ...) powered by node-thermal-printer",
   "private": true,
   "license": "MIT",
@@ -27,6 +27,7 @@
     "testEnvironment": "node"
   },
   "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.32.2",
     "@nestjs/common": "^11",
     "@nestjs/core": "^11",
     "@nestjs/platform-express": "^11",
@@ -35,7 +36,8 @@
     "class-validator": "^0.15.1",
     "node-thermal-printer": "^4.6.1",
     "reflect-metadata": "^0.2.2",
-    "rxjs": "^7.8.2"
+    "rxjs": "^7.8.2",
+    "zod": "^4.6.7"
   },
   "devDependencies": {
     "@eslint/js": "^9",

@@ -1,12 +1,13 @@
 import { Module } from '@nestjs/common';
 import { APP_GUARD } from '@nestjs/core';
 import { ApiKeyGuard } from './api-key.guard';
+import { McpController } from './mcp.controller';
 import { Env, env } from './config';
 import { PrinterController } from './printer/printer.controller';
 import { PrinterService } from './printer/printer.service';
 
 @Module({
-  controllers: [PrinterController],
+  controllers: [PrinterController, McpController],
   providers: [
     { provide: Env, useValue: env },
     PrinterService,
